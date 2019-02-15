@@ -285,7 +285,15 @@ public final class Main {
             side = side2;
           }
         }
-        SmartDashboard.putNumber("Vision/targetcount", targets.size());
+
+        String[] targetsJson = new String[targets.size()];
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+        for(int i = 0; i < targets.size(); i++){
+          targetsJson[i] = gson.toJson(targets.get(i));
+        }
+        SmartDashboard.putStringArray("Vision/targets", targetsJson);
+        SmartDashboard.putNumber("Vision/targetCount", targets.size());
         SmartDashboard.putBoolean("Vision/isOrdered", isOrdered);
       });
       visionThread.start();
