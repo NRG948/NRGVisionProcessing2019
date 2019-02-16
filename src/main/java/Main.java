@@ -255,27 +255,18 @@ public final class Main {
     // start image processing on camera 0 if present
     if (cameras.size() >= 1) {
       VisionThread visionThread = new VisionThread(cameras.get(0), new GripPipelineTwo(), pipeline -> {
-        // write code for me pls
-        // System.out.println("Seeing " + pipeline.findContoursOutput().size());
-        // if (!pipeline.filterContoursOutput().isEmpty()) {
-        // MatOfPoint array = pipeline.filterContoursOutput().get(0);
-        // Rect r = Imgproc.boundingRect(array);
-        // System.out.println("Number of points: " + array.size());
-        // synchronized (visionlock) {
-        // centerX.setDouble(r.x + (r.width / 2));
-        // }
 
-        // }
         ArrayList<Target> targets = new ArrayList<Target>();
         for (MatOfPoint mat : pipeline.filterContoursOutput()) {
           Target target = new Target(mat);
           targets.add(target);
-
         }
+
         boolean isOrdered = true;
         if (!targets.isEmpty()) {
           Collections.sort(targets, (left, right) -> (int) (left.getMinX().x - right.getMinX().x));
           Target.Side side = targets.get(0).getSide();
+          
           for (int i = 1; i < targets.size(); ++i) {
             Target.Side side2 = targets.get(i).getSide();
             if (side2 == side || side2 == Target.Side.UNKOWN) {
