@@ -29,6 +29,7 @@ public class TargetPipeline implements VisionPipeline {
 	private Mat hsvThresholdOutput = new Mat();
 	private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
 	private ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
+	private long processTime = 0;
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -38,6 +39,7 @@ public class TargetPipeline implements VisionPipeline {
 	 * This is the primary method that runs the entire pipeline and updates the outputs.
 	 */
 	@Override	public void process(Mat source0) {
+		long startTime = System.nanoTime();
 		// Step HSV_Threshold0:
 		Mat hsvThresholdInput = source0;
 		double[] hsvThresholdHue = {45.32374100719424, 99.69696969696969};
@@ -64,8 +66,10 @@ public class TargetPipeline implements VisionPipeline {
 		double filterContoursMinRatio = 0.0;
 		double filterContoursMaxRatio = 1000.0;
 		filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
-
+		long endTime = System.nanoTime();
+		processTime = endTime-startTime;
 	}
+
 
 	/**
 	 * This method is a generated getter for the output of a HSV_Threshold.
@@ -179,7 +183,9 @@ public class TargetPipeline implements VisionPipeline {
 		}
 	}
 
-
+	public long getProcessTime(){
+		return processTime;
+	}
 
 
 }

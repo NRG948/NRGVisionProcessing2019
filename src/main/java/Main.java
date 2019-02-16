@@ -264,6 +264,7 @@ public final class Main {
         SmartDashboard.putStringArray("Vision/targets", targetsJson);
         SmartDashboard.putNumber("Vision/targetCount", targets.size());
         SmartDashboard.putBoolean("Vision/isOrdered", isOrdered);
+        SmartDashboard.putNumber("Vision/processTime" , pipeline.getProcessTime()/1000000.0);
       });
       visionThread.start();
     }
