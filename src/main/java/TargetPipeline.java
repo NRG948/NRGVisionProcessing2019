@@ -23,7 +23,7 @@ import org.opencv.objdetect.*;
 *
 * @author GRIP
 */
-public class GripPipelineTwo implements VisionPipeline {
+public class TargetPipeline implements VisionPipeline {
 
 	//Outputs
 	private Mat hsvThresholdOutput = new Mat();

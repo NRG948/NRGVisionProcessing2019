@@ -10,11 +10,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.opencv.core.Rect;
-import org.opencv.imgproc.Imgproc;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -29,12 +26,10 @@ import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.vision.VisionPipeline;
 import edu.wpi.first.vision.VisionThread;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
 
-import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 
 /*
@@ -86,8 +81,6 @@ public final class Main {
   public static int team;
   public static boolean server;
   public static List<CameraConfig> cameraConfigs = new ArrayList<>();
-
-  private static final Object visionlock = new Object();
 
   private Main() {
   }
@@ -209,18 +202,6 @@ public final class Main {
   }
 
   /**
-   * Example pipeline.
-   */
-  public static class MyPipeline implements VisionPipeline {
-    public int val;
-
-    @Override
-    public void process(Mat mat) {
-      val += 1;
-    }
-  }
-
-  /**
    * Main.
    */
   public static void main(String... args) {
@@ -243,9 +224,6 @@ public final class Main {
       ntinst.startClientTeam(team);
     }
 
-    NetworkTable nTable = ntinst.getTable("TestTable");
-
-    NetworkTableEntry centerX = nTable.getEntry("centerX");
     // start cameras
     List<VideoSource> cameras = new ArrayList<>();
     for (CameraConfig cameraConfig : cameraConfigs) {
@@ -254,7 +232,7 @@ public final class Main {
 
     // start image processing on camera 0 if present
     if (cameras.size() >= 1) {
-      VisionThread visionThread = new VisionThread(cameras.get(0), new GripPipelineTwo(), pipeline -> {
+      VisionThread visionThread = new VisionThread(cameras.get(0), new TargetPipeline(), pipeline -> {
 
         ArrayList<Target> targets = new ArrayList<Target>();
         for (MatOfPoint mat : pipeline.filterContoursOutput()) {
