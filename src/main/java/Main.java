@@ -268,11 +268,8 @@ public final class Main {
         Mat image = pipeline.getImage();
         for (int i = 0; i < targets.size(); ++i) {
           Target target = targets.get(i);
-          Point center = target.getCenter();
-          Point adjCenter = new Point(center.x, -center.y);
           Scalar color = target.getSide()== Target.Side.LEFT?RED_COLOR:BLUE_COLOR;
-          Imgproc.circle(image, adjCenter, 10, color,1);
-          //Imgproc.rectangle(image, target.getMinX(), target.getMaxY(), color,1);
+          Imgproc.fillConvexPoly(image, target.toMatOfPoint(), color);
         }
         Imgproc.circle(image, IMAGE_CENTER, 10, GREEN_COLOR);
         processedVideo.putFrame(image);

@@ -70,4 +70,12 @@ public class Target {
     public Point getCenter() {
         return new Point((getMinX().x + getMaxX().x)/2, (getMinY().y + getMaxY().y)/2);
     }
+
+    public MatOfPoint toMatOfPoint(){
+        Point adjMinX = new Point(this.minX.x,-this.minX.y);
+        Point adjMinY = new Point(this.minY.x,-this.minY.y);
+        Point adjMaxX = new Point(this.maxX.x,-this.maxX.y);
+        Point adjMaxY = new Point(this.maxY.x,-this.maxY.y);
+        return new MatOfPoint(adjMinX,adjMinY,adjMaxX,adjMaxY);
+    }
 }
