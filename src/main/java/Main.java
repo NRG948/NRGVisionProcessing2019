@@ -78,6 +78,7 @@ public final class Main {
   private static String configFile = "/boot/frc.json";
   private static final Point IMAGE_CENTER = new Point(160, 120);
   private static final Scalar GREEN_COLOR = new Scalar(0,255,0);
+  private static final Scalar PURPLE_COLOR = new Scalar(255,0,255);
 
   @SuppressWarnings("MemberName")
   public static class CameraConfig {
@@ -251,6 +252,7 @@ public final class Main {
         }
 
         boolean isOrdered = true;
+        Point targetCenter = null;
         if (!targets.isEmpty()) {
           Collections.sort(targets, (left, right) -> (int) (left.getMinX().x - right.getMinX().x));
           Target.Side side = targets.get(0).getSide();
@@ -260,6 +262,13 @@ public final class Main {
             if (side2 == side || side2 == Target.Side.UNKOWN) {
               isOrdered = false;
               break;
+            }
+            if(side==Target.Side.LEFT&&targetCenter==null){
+              Point leftCenter = targets.get(i-1).getCenter();
+              Point rightCenter = targets.get(i).getCenter();
+              double centerX = (rightCenter.x+leftCenter.x)/2;
+              double centerY = -(rightCenter.y+leftCenter.y)/2;
+              targetCenter = new Point(centerX,centerY);
             }
             side = side2;
           }
@@ -271,7 +280,10 @@ public final class Main {
           Scalar color = target.getSide()== Target.Side.LEFT?RED_COLOR:BLUE_COLOR;
           Imgproc.fillConvexPoly(image, target.toMatOfPoint(), color);
         }
-        Imgproc.circle(image, IMAGE_CENTER, 10, GREEN_COLOR);
+        Imgproc.circle(image, IMAGE_CENTER, 5, GREEN_COLOR, -1);
+        if(targetCenter!=null){
+          Imgproc.circle(image, targetCenter, 10, PURPLE_COLOR, 2);
+        }
         processedVideo.putFrame(image);
 
         String[] targetsJson = new String[targets.size()];
