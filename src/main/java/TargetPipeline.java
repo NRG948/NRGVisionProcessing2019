@@ -24,6 +24,8 @@ import org.opencv.objdetect.*;
 * @author GRIP
 */
 public class TargetPipeline implements VisionPipeline {
+	//Inputs
+	private Mat image;
 
 	//Outputs
 	private Mat hsvThresholdOutput = new Mat();
@@ -40,6 +42,7 @@ public class TargetPipeline implements VisionPipeline {
 	 */
 	@Override	public void process(Mat source0) {
 		long startTime = System.nanoTime();
+		image = source0;
 		// Step HSV_Threshold0:
 		Mat hsvThresholdInput = source0;
 		double[] hsvThresholdHue = {45.32374100719424, 99.69696969696969};
@@ -183,8 +186,14 @@ public class TargetPipeline implements VisionPipeline {
 		}
 	}
 
+	public Mat getImage(){
+		return image;
+	}
+
+
 	public long getProcessTime(){
 		return processTime;
+
 	}
 
 

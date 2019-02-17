@@ -20,6 +20,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import edu.wpi.cscore.CvSource;
 import edu.wpi.cscore.MjpegServer;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.cscore.VideoSource;
@@ -30,7 +31,11 @@ import edu.wpi.first.vision.VisionThread;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
 
+import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 /*
    JSON format:
@@ -68,7 +73,11 @@ import org.opencv.core.MatOfPoint;
  */
 
 public final class Main {
+  private static final Scalar BLUE_COLOR = new Scalar(255, 0, 0);
+  private static final Scalar RED_COLOR = new Scalar(0, 0, 255);
   private static String configFile = "/boot/frc.json";
+  private static final Point IMAGE_CENTER = new Point(160, 120);
+  private static final Scalar GREEN_COLOR = new Scalar(0,255,0);
 
   @SuppressWarnings("MemberName")
   public static class CameraConfig {
@@ -232,6 +241,7 @@ public final class Main {
 
     // start image processing on camera 0 if present
     if (cameras.size() >= 1) {
+      CvSource processedVideo = CameraServer.getInstance().putVideo("Processed", 320, 240);
       VisionThread visionThread = new VisionThread(cameras.get(0), new TargetPipeline(), pipeline -> {
 
         ArrayList<Target> targets = new ArrayList<Target>();
@@ -244,7 +254,7 @@ public final class Main {
         if (!targets.isEmpty()) {
           Collections.sort(targets, (left, right) -> (int) (left.getMinX().x - right.getMinX().x));
           Target.Side side = targets.get(0).getSide();
-          
+
           for (int i = 1; i < targets.size(); ++i) {
             Target.Side side2 = targets.get(i).getSide();
             if (side2 == side || side2 == Target.Side.UNKOWN) {
@@ -255,16 +265,28 @@ public final class Main {
           }
         }
 
+        Mat image = pipeline.getImage();
+        for (int i = 0; i < targets.size(); ++i) {
+          Target target = targets.get(i);
+          Point center = target.getCenter();
+          Point adjCenter = new Point(center.x, -center.y);
+          Scalar color = target.getSide()== Target.Side.LEFT?RED_COLOR:BLUE_COLOR;
+          Imgproc.circle(image, adjCenter, 10, color,1);
+          //Imgproc.rectangle(image, target.getMinX(), target.getMaxY(), color,1);
+        }
+        Imgproc.circle(image, IMAGE_CENTER, 10, GREEN_COLOR);
+        processedVideo.putFrame(image);
+
         String[] targetsJson = new String[targets.size()];
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
-        for(int i = 0; i < targets.size(); i++){
+        for (int i = 0; i < targets.size(); i++) {
           targetsJson[i] = gson.toJson(targets.get(i));
         }
         SmartDashboard.putStringArray("Vision/targets", targetsJson);
         SmartDashboard.putNumber("Vision/targetCount", targets.size());
         SmartDashboard.putBoolean("Vision/isOrdered", isOrdered);
-        SmartDashboard.putNumber("Vision/processTime" , pipeline.getProcessTime()/1000000.0);
+        SmartDashboard.putNumber("Vision/processTime", pipeline.getProcessTime() / 1000000.0);
       });
       visionThread.start();
     }
