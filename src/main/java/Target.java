@@ -30,7 +30,7 @@ public class Target {
             if(p.x > maxX.x) {
                 maxX = p;
             }
-            if(p.y < maxY.y) {
+            if(p.y > maxY.y) {
                 maxY = p;
             }
         }
@@ -53,5 +53,21 @@ public class Target {
     }
     public Point getMinX(){
         return this.minX;
+    }
+
+    public Point getMinY() {
+        return this.minY;
+    }
+
+    public Point getMaxX() {
+        return this.maxX;
+    }
+
+    public Point getMaxY() {
+        return this.maxY;
+    }
+
+    public Point getCenter() {
+        return new Point((getMinX().x + getMaxX().x)/2, (getMinY().y + getMaxY().y)/2);
     }
 }
