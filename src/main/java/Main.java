@@ -245,16 +245,18 @@ public final class Main {
       CvSource processedVideo = CameraServer.getInstance().putVideo("Processed", 320, 240);
       VisionThread visionThread = new VisionThread(cameras.get(0), new TargetPipeline(), pipeline -> {
 
+        boolean isCameraInverted = SmartDashboard.getBoolean("Vision/cameraInverted", false);
         ArrayList<Target> targets = new ArrayList<Target>();
         for (MatOfPoint mat : pipeline.filterContoursOutput()) {
-          Target target = new Target(mat);
+          Target target = new Target(mat, isCameraInverted);
           targets.add(target);
         }
+
 
         boolean isOrdered = true;
         Point targetCenter = null;
         if (!targets.isEmpty()) {
-          Collections.sort(targets, (left, right) -> (int) (left.getMinX().x - right.getMinX().x));
+          Collections.sort(targets, (left, right) -> (int) (left.getMinX().x - right.getMinX().x)*(isCameraInverted?-1:1));
           Target.Side side = targets.get(0).getSide();
 
           for (int i = 1; i < targets.size(); ++i) {
@@ -267,7 +269,13 @@ public final class Main {
               Point leftCenter = targets.get(i-1).getCenter();
               Point rightCenter = targets.get(i).getCenter();
               double centerX = (rightCenter.x+leftCenter.x)/2;
-              double centerY = -(rightCenter.y+leftCenter.y)/2;
+              double centerY = (rightCenter.y+leftCenter.y)/2;
+              if(isCameraInverted){
+                centerX = -centerX;
+              }
+              else{
+                centerY = -centerY;
+              }
               targetCenter = new Point(centerX,centerY);
             }
             side = side2;
