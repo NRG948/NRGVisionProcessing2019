@@ -6,6 +6,7 @@ public class Target {
         LEFT, RIGHT, UNKOWN;
     }
 
+
     private Point minX;
     private Point maxX;
     private Point minY;

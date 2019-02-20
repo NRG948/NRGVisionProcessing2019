@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -77,8 +78,8 @@ public final class Main {
   private static final Scalar RED_COLOR = new Scalar(0, 0, 255);
   private static String configFile = "/boot/frc.json";
   private static final Point IMAGE_CENTER = new Point(160, 120);
-  private static final Scalar GREEN_COLOR = new Scalar(0,255,0);
-  private static final Scalar PURPLE_COLOR = new Scalar(255,0,255);
+  private static final Scalar GREEN_COLOR = new Scalar(0, 255, 0);
+  private static final Scalar PURPLE_COLOR = new Scalar(255, 0, 255);
 
   @SuppressWarnings("MemberName")
   public static class CameraConfig {
@@ -252,11 +253,11 @@ public final class Main {
           targets.add(target);
         }
 
-
         boolean isOrdered = true;
         Point targetCenter = null;
         if (!targets.isEmpty()) {
-          Collections.sort(targets, (left, right) -> (int) (left.getMinX().x - right.getMinX().x)*(isCameraInverted?-1:1));
+          Collections.sort(targets,
+              (left, right) -> (int) (left.getMinX().x - right.getMinX().x) * (isCameraInverted ? -1 : 1));
           Target.Side side = targets.get(0).getSide();
 
           for (int i = 1; i < targets.size(); ++i) {
@@ -265,44 +266,49 @@ public final class Main {
               isOrdered = false;
               break;
             }
-            if(side==Target.Side.LEFT&&targetCenter==null){
-              Point leftCenter = targets.get(i-1).getCenter();
-              Point rightCenter = targets.get(i).getCenter();
-              double centerX = (rightCenter.x+leftCenter.x)/2;
-              double centerY = (rightCenter.y+leftCenter.y)/2;
-              if(isCameraInverted){
-                centerX = -centerX;
-              }
-              else{
-                centerY = -centerY;
-              }
-              targetCenter = new Point(centerX,centerY);
-            }
             side = side2;
           }
+        }
+
+        ArrayList<TargetPair> targetPairs = new ArrayList<TargetPair>();
+        if (targets.size() >= 2) {
+          for (int i = 0; i < targets.size() - 1; ++i) {
+            Target current = targets.get(i);
+            if (current.getSide() == Target.Side.LEFT) {
+              Target nextTarget = targets.get(i + 1);
+              if (nextTarget.getSide() == Target.Side.RIGHT) {
+                TargetPair targetPair = new TargetPair(current, nextTarget);
+                targetPairs.add(targetPair);
+                ++i;
+              }
+            }
+          }
+        }
+        Collections.sort(targetPairs, (left, right) -> (int)(Math.abs(left.getCenterOfTargets().x-160)-(Math.abs(right.getCenterOfTargets().x-160))));
+
+        if(!targetPairs.isEmpty()){
+          targetCenter = targetPairs.get(0).getCenterOfTargets();
         }
 
         Mat image = pipeline.getImage();
         for (int i = 0; i < targets.size(); ++i) {
           Target target = targets.get(i);
-          Scalar color = target.getSide()== Target.Side.LEFT?RED_COLOR:BLUE_COLOR;
+          Scalar color = target.getSide() == Target.Side.LEFT ? RED_COLOR : BLUE_COLOR;
           Imgproc.fillConvexPoly(image, target.toMatOfPoint(), color);
         }
         Imgproc.circle(image, IMAGE_CENTER, 5, GREEN_COLOR, -1);
-        if(targetCenter!=null){
+        if (targetCenter != null) {
           Imgproc.circle(image, targetCenter, 10, PURPLE_COLOR, 2);
         }
         processedVideo.putFrame(image);
 
-        String[] targetsJson = new String[targets.size()];
+        String[] targetPairsJson = new String[targetPairs.size()];
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
-        for (int i = 0; i < targets.size(); i++) {
-          targetsJson[i] = gson.toJson(targets.get(i));
+        for (int i = 0; i < targetPairs.size(); i++) {
+          targetPairsJson[i] = gson.toJson(targetPairs.get(i));
         }
-        SmartDashboard.putStringArray("Vision/targets", targetsJson);
-        SmartDashboard.putNumber("Vision/targetCount", targets.size());
-        SmartDashboard.putBoolean("Vision/isOrdered", isOrdered);
+        SmartDashboard.putStringArray("Vision/targetPairs", targetPairsJson);
         SmartDashboard.putNumber("Vision/processTime", pipeline.getProcessTime() / 1000000.0);
       });
       visionThread.start();
