@@ -24,6 +24,7 @@ import com.google.gson.JsonParser;
 import edu.wpi.cscore.CvSource;
 import edu.wpi.cscore.MjpegServer;
 import edu.wpi.cscore.UsbCamera;
+import edu.wpi.cscore.VideoMode;
 import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -77,7 +78,6 @@ public final class Main {
   private static final Scalar BLUE_COLOR = new Scalar(255, 0, 0);
   private static final Scalar RED_COLOR = new Scalar(0, 0, 255);
   private static String configFile = "/boot/frc.json";
-  private static final Point IMAGE_CENTER = new Point(160, 120);
   private static final Scalar GREEN_COLOR = new Scalar(0, 255, 0);
   private static final Scalar PURPLE_COLOR = new Scalar(255, 0, 255);
 
@@ -244,7 +244,11 @@ public final class Main {
     // start image processing on camera 0 if present
     if (cameras.size() >= 1) {
       CvSource processedVideo = CameraServer.getInstance().putVideo("Processed", 320, 240);
-      VisionThread visionThread = new VisionThread(cameras.get(0), new TargetPipeline(), pipeline -> {
+
+      VideoSource videoSource = cameras.get(0);
+      VideoMode videoMode = videoSource.getVideoMode();
+      Point imageCenter = new Point(videoMode.width / 2, videoMode.height / 2);
+      VisionThread visionThread = new VisionThread(videoSource, new TargetPipeline(), pipeline -> {
 
         long startTime = System.nanoTime();
 
@@ -286,8 +290,8 @@ public final class Main {
             }
           }
         }
-        Collections.sort(targetPairs, (left, right) -> (int) (Math.abs(left.getCenterOfTargets().x - 160)
-            - (Math.abs(right.getCenterOfTargets().x - 160))));
+        Collections.sort(targetPairs, (left, right) -> (int) (Math.abs(left.getCenterOfTargets().x - imageCenter.x)
+            - (Math.abs(right.getCenterOfTargets().x - imageCenter.x))));
 
         if (!targetPairs.isEmpty()) {
           targetCenter = targetPairs.get(0).getCenterOfTargets();
@@ -299,7 +303,7 @@ public final class Main {
           Scalar color = target.getSide() == Target.Side.LEFT ? RED_COLOR : BLUE_COLOR;
           Imgproc.fillConvexPoly(image, target.toMatOfPoint(), color);
         }
-        Imgproc.circle(image, IMAGE_CENTER, 5, GREEN_COLOR, -1);
+        Imgproc.circle(image, imageCenter, 5, GREEN_COLOR, -1);
         if (targetCenter != null) {
           Imgproc.circle(image, targetCenter, 10, PURPLE_COLOR, 2);
         }
