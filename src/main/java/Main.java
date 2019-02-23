@@ -246,6 +246,8 @@ public final class Main {
       CvSource processedVideo = CameraServer.getInstance().putVideo("Processed", 320, 240);
       VisionThread visionThread = new VisionThread(cameras.get(0), new TargetPipeline(), pipeline -> {
 
+        long startTime = System.nanoTime();
+
         boolean isCameraInverted = SmartDashboard.getBoolean("Vision/cameraInverted", false);
         ArrayList<Target> targets = new ArrayList<Target>();
         for (MatOfPoint mat : pipeline.filterContoursOutput()) {
@@ -284,9 +286,10 @@ public final class Main {
             }
           }
         }
-        Collections.sort(targetPairs, (left, right) -> (int)(Math.abs(left.getCenterOfTargets().x-160)-(Math.abs(right.getCenterOfTargets().x-160))));
+        Collections.sort(targetPairs, (left, right) -> (int) (Math.abs(left.getCenterOfTargets().x - 160)
+            - (Math.abs(right.getCenterOfTargets().x - 160))));
 
-        if(!targetPairs.isEmpty()){
+        if (!targetPairs.isEmpty()) {
           targetCenter = targetPairs.get(0).getCenterOfTargets();
         }
 
@@ -308,8 +311,12 @@ public final class Main {
         for (int i = 0; i < targetPairs.size(); i++) {
           targetPairsJson[i] = gson.toJson(targetPairs.get(i));
         }
+
+        long endTime = System.nanoTime();
+
         SmartDashboard.putStringArray("Vision/targetPairs", targetPairsJson);
         SmartDashboard.putNumber("Vision/processTime", pipeline.getProcessTime() / 1000000.0);
+        SmartDashboard.putNumber("Vision/postProcessTime", (endTime - startTime) / 1000000.0);
       });
       visionThread.start();
     }
