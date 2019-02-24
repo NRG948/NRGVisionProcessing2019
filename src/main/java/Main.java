@@ -321,6 +321,7 @@ public final class Main {
         SmartDashboard.putStringArray("Vision/targetPairs", targetPairsJson);
         SmartDashboard.putNumber("Vision/processTime", pipeline.getProcessTime() / 1000000.0);
         SmartDashboard.putNumber("Vision/postProcessTime", (endTime - startTime) / 1000000.0);
+        SmartDashboard.putNumber("Vision/imageCenterX", imageCenter.x);
       });
       visionThread.start();
     }
