@@ -92,6 +92,7 @@ public final class Main {
   public static int team;
   public static boolean server;
   public static List<CameraConfig> cameraConfigs = new ArrayList<>();
+  public static int genCount = 0;
 
   private Main() {
   }
@@ -321,6 +322,7 @@ public final class Main {
         SmartDashboard.putStringArray("Vision/targetPairs", targetPairsJson);
         SmartDashboard.putNumber("Vision/processTime", pipeline.getProcessTime() / 1000000.0);
         SmartDashboard.putNumber("Vision/postProcessTime", (endTime - startTime) / 1000000.0);
+        SmartDashboard.putNumber("Vision/genCount", genCount++);
       });
       visionThread.start();
     }
