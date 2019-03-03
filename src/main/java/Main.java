@@ -323,6 +323,7 @@ public final class Main {
         SmartDashboard.putNumber("Vision/processTime", pipeline.getProcessTime() / 1000000.0);
         SmartDashboard.putNumber("Vision/postProcessTime", (endTime - startTime) / 1000000.0);
         SmartDashboard.putNumber("Vision/genCount", genCount++);
+        SmartDashboard.putNumber("Vision/imageCenterX", imageCenter.x);
       });
       visionThread.start();
     }
