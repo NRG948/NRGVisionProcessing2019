@@ -257,7 +257,10 @@ public final class Main {
         ArrayList<Target> targets = new ArrayList<Target>();
         for (MatOfPoint mat : pipeline.filterContoursOutput()) {
           Target target = new Target(mat, isCameraInverted);
-          targets.add(target);
+          double ratio = Math.abs(target.getMaxY().y - target.getMinY().y) / Math.abs(target.getMaxX().x - target.getMinX().x); 
+          if(ratio > 1.3) {
+            targets.add(target);
+          }
         }
 
         boolean isOrdered = true;
