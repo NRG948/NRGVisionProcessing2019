@@ -249,6 +249,7 @@ public final class Main {
       VideoSource videoSource = cameras.get(0);
       VideoMode videoMode = videoSource.getVideoMode();
       Point imageCenter = new Point(videoMode.width / 2, videoMode.height / 2);
+      Gson gson = new Gson();
       VisionThread visionThread = new VisionThread(videoSource, new TargetPipeline(), pipeline -> {
 
         long startTime = System.nanoTime();
@@ -314,8 +315,6 @@ public final class Main {
         processedVideo.putFrame(image);
 
         String[] targetPairsJson = new String[targetPairs.size()];
-        GsonBuilder builder = new GsonBuilder();
-        Gson gson = builder.create();
         for (int i = 0; i < targetPairs.size(); i++) {
           targetPairsJson[i] = gson.toJson(targetPairs.get(i));
         }
