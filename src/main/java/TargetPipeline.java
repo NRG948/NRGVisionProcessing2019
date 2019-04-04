@@ -47,7 +47,7 @@ public class TargetPipeline implements VisionPipeline {
 		Mat hsvThresholdInput = source0;
 		double[] hsvThresholdHue = {45.0, 100.0};
 		double[] hsvThresholdSaturation = {65.0, 255.0};
-		double[] hsvThresholdValue = {170.0, 255.0};
+		double[] hsvThresholdValue = {220.0, 255.0};
 		hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
 
 		// Step Find_Contours0:
@@ -57,7 +57,7 @@ public class TargetPipeline implements VisionPipeline {
 
 		// Step Filter_Contours0:
 		ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
-		double filterContoursMinArea = 100.0;
+		double filterContoursMinArea = 175.0;
 		double filterContoursMinPerimeter = 0.0;
 		double filterContoursMinWidth = 0.0;
 		double filterContoursMaxWidth = 1000.0;
