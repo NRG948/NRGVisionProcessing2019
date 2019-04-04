@@ -245,6 +245,7 @@ public final class Main {
     // start image processing on camera 0 if present
     if (cameras.size() >= 1) {
       CvSource processedVideo = CameraServer.getInstance().putVideo("Processed", 320, 240);
+      Mat processedImage = new Mat(240, 320, processedVideo.getVideoMode().pixelFormat.getValue());
 
       VideoSource videoSource = cameras.get(0);
       VideoMode videoMode = videoSource.getVideoMode();
@@ -312,7 +313,8 @@ public final class Main {
         if (targetCenter != null) {
           Imgproc.circle(image, targetCenter, 10, PURPLE_COLOR, 2);
         }
-        processedVideo.putFrame(image);
+        Imgproc.resize(image, processedImage, processedImage.size());
+        processedVideo.putFrame(processedImage);
 
         String[] targetPairsJson = new String[targetPairs.size()];
         for (int i = 0; i < targetPairs.size(); i++) {
